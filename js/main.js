@@ -74,15 +74,60 @@ function loadImageFile(event) {
   reader.onload = function(ev) {
     var dataUrl = ev.target.result;
     selectedImageMime = file.type || 'image/png';
-    selectedImageDataUrl = String(dataUrl);
-    selectedImageBase64 = selectedImageDataUrl.split(',')[1];
     tracedSVG = null;
     el('btn-insert').disabled = true;
-    el('img-preview').innerHTML = '<img src="' + selectedImageDataUrl + '" alt="">';
+    el('img-preview').innerHTML = '<img src="' + String(dataUrl) + '" alt="">';
     el('svg-preview').innerHTML = '<span class="preview-placeholder">SVG preview appears here</span>';
-    setStatus('Image loaded. Ready to trace.', 'success');
+    setStatus('Preparing raster image for QuiverIt...', '');
+
+    rasterizeForUpload(String(dataUrl), 2400)
+      .then(function(pngDataUrl) {
+        selectedImageMime = 'image/png';
+        selectedImageDataUrl = pngDataUrl;
+        selectedImageBase64 = selectedImageDataUrl.split(',')[1];
+        setStatus('Image loaded. Ready to trace.', 'success');
+      })
+      .catch(function(err) {
+        selectedImageDataUrl = null;
+        selectedImageBase64 = null;
+        setStatus(err.message || 'Could not prepare image.', 'error');
+      });
   };
   reader.readAsDataURL(file);
+}
+
+function rasterizeForUpload(dataUrl, maxSize) {
+  return new Promise(function(resolve, reject) {
+    var img = new Image();
+    img.onload = function() {
+      var width = img.naturalWidth || img.width;
+      var height = img.naturalHeight || img.height;
+      if (!width || !height) {
+        reject(new Error('Could not read image dimensions.'));
+        return;
+      }
+
+      var scale = Math.min(1, maxSize / Math.max(width, height));
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(width * scale));
+      canvas.height = Math.max(1, Math.round(height * scale));
+
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      try {
+        resolve(canvas.toDataURL('image/png'));
+      } catch (err) {
+        reject(new Error('Could not rasterize image for upload.'));
+      }
+    };
+    img.onerror = function() {
+      reject(new Error('Could not load selected image.'));
+    };
+    img.src = dataUrl;
+  });
 }
 
 function vectorizeImage() {
