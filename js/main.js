@@ -7,6 +7,7 @@ window.onerror = function(message, source, lineno) {
 var cs = new CSInterface();
 var BASE_URL = 'https://api.quiver.ai/v1';
 var selectedImageBase64 = null;
+var selectedImageDataUrl = null;
 var selectedImageMime = null;
 var tracedSVG = null;
 
@@ -73,10 +74,11 @@ function loadImageFile(event) {
   reader.onload = function(ev) {
     var dataUrl = ev.target.result;
     selectedImageMime = file.type || 'image/png';
-    selectedImageBase64 = String(dataUrl).split(',')[1];
+    selectedImageDataUrl = String(dataUrl);
+    selectedImageBase64 = selectedImageDataUrl.split(',')[1];
     tracedSVG = null;
     el('btn-insert').disabled = true;
-    el('img-preview').innerHTML = '<img src="' + dataUrl + '" alt="">';
+    el('img-preview').innerHTML = '<img src="' + selectedImageDataUrl + '" alt="">';
     el('svg-preview').innerHTML = '<span class="preview-placeholder">SVG preview appears here</span>';
     setStatus('Image loaded. Ready to trace.', 'success');
   };
@@ -101,27 +103,19 @@ function vectorizeImage() {
   tracedSVG = null;
   setStatus('Tracing image with QuiverIt API...', '');
 
-  fetch(BASE_URL + '/svgs/vectorizations', {
-    method: 'POST',
-    headers: {
-      Authorization: 'Bearer ' + key,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      model: el('vec-model').value,
-      image: {
-        base64: selectedImageBase64,
-        media_type: selectedImageMime
-      }
-    })
+  postVectorize(key, {
+    model: el('vec-model').value,
+    stream: false,
+    image: { base64: selectedImageBase64 }
   })
-    .then(function(response) {
-      if (!response.ok) {
-        return response.json().then(function(errorBody) {
-          throw new Error(errorBody.message || String(response.status));
-        });
-      }
-      return response.json();
+    .catch(function(firstError) {
+      if (!isInvalidImageError(firstError)) throw firstError;
+      setStatus('Retrying with data URL image payload...', '');
+      return postVectorize(key, {
+        model: el('vec-model').value,
+        stream: false,
+        image: { base64: selectedImageDataUrl }
+      });
     })
     .then(function(data) {
       var svg = data && data.data && data.data[0] && data.data[0].svg;
@@ -138,6 +132,36 @@ function vectorizeImage() {
     .finally(function() {
       button.disabled = false;
     });
+}
+
+function postVectorize(key, body) {
+  return fetch(BASE_URL + '/svgs/vectorizations', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + key,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  })
+    .then(function(response) {
+      if (!response.ok) {
+        return response.text().then(function(text) {
+          var errorBody = {};
+          try { errorBody = JSON.parse(text); } catch (parseErr) { errorBody.message = text; }
+          var err = new Error(errorBody.message || String(response.status));
+          err.status = response.status;
+          err.code = errorBody.code || '';
+          err.request_id = errorBody.request_id || '';
+          if (err.request_id) err.message += ' (' + err.request_id + ')';
+          throw err;
+        });
+      }
+      return response.json();
+    });
+}
+
+function isInvalidImageError(err) {
+  return err && err.status === 400 && /image/i.test(err.message || '');
 }
 
 function showPreview(svgString) {
