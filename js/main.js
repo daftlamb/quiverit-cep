@@ -106,15 +106,15 @@ function vectorizeImage() {
   postVectorize(key, {
     model: el('vec-model').value,
     stream: false,
-    image: { base64: selectedImageBase64 }
+    image: { url: selectedImageDataUrl }
   })
     .catch(function(firstError) {
       if (!isInvalidImageError(firstError)) throw firstError;
-      setStatus('Retrying with data URL image payload...', '');
+      setStatus('Retrying with raw base64 payload...', '');
       return postVectorize(key, {
         model: el('vec-model').value,
         stream: false,
-        image: { base64: selectedImageDataUrl }
+        image: { base64: selectedImageBase64 }
       });
     })
     .then(function(data) {
