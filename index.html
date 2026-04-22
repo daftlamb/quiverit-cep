@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quiver It</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<div class="header">
+  <h1>Quiver <span>It</span></h1>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="generate">Generate</div>
+  <div class="tab" data-tab="vectorize">Vectorize</div>
+  <div class="tab" data-tab="settings">Settings</div>
+</div>
+
+<!-- GENERATE TAB -->
+<div class="panel" id="tab-generate">
+  <div>
+    <label>Prompt</label>
+    <textarea id="prompt" placeholder="a minimal fox logo, flat design, geometric..."></textarea>
+  </div>
+  <div class="row">
+    <div>
+      <label>Model</label>
+      <select id="model">
+        <option value="arrow-1.1">Arrow 1.1 (recommended)</option>
+        <option value="arrow-1.1-max">Arrow 1.1 Max (high fidelity)</option>
+        <option value="arrow-1.0">Arrow 1.0</option>
+      </select>
+    </div>
+    <div>
+      <label>Count</label>
+      <select id="count">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="4">4</option>
+      </select>
+    </div>
+  </div>
+  <div class="preview-box" id="gen-preview">
+    <span class="preview-placeholder">preview appears here</span>
+  </div>
+  <div class="status" id="gen-status"></div>
+  <button class="btn btn-primary" id="btn-generate">Generate SVG</button>
+  <button class="btn btn-secondary" id="btn-insert" disabled>Insert into Illustrator</button>
+</div>
+
+<!-- VECTORIZE TAB -->
+<div class="panel hidden" id="tab-vectorize">
+  <div>
+    <label>Image file</label>
+    <input type="file" id="img-file" accept="image/*" style="display:none"/>
+    <button class="btn btn-secondary" id="btn-pick-img">Choose Image…</button>
+    <div class="preview-box" style="margin-top:8px" id="vec-img-preview">
+      <span class="preview-placeholder">no image selected</span>
+    </div>
+  </div>
+  <div>
+    <label>Model</label>
+    <select id="vec-model">
+      <option value="arrow-1.1">Arrow 1.1 (recommended)</option>
+      <option value="arrow-1.1-max">Arrow 1.1 Max (high fidelity)</option>
+      <option value="arrow-1.0">Arrow 1.0</option>
+    </select>
+  </div>
+  <div class="preview-box" id="vec-preview">
+    <span class="preview-placeholder">vectorized SVG appears here</span>
+  </div>
+  <div class="status" id="vec-status"></div>
+  <button class="btn btn-primary" id="btn-vectorize">Vectorize</button>
+  <button class="btn btn-secondary" id="btn-vec-insert" disabled>Insert into Illustrator</button>
+</div>
+
+<!-- SETTINGS TAB -->
+<div class="panel hidden" id="tab-settings">
+  <div>
+    <label>API Key</label>
+    <div class="api-row">
+      <input type="password" id="api-key" placeholder="qvr-..."/>
+      <button id="btn-save-key">Save</button>
+    </div>
+  </div>
+  <div class="status" id="key-status"></div>
+  <div style="margin-top:4px">
+    <label>Credits</label>
+    <div class="status" id="credits-display">— (save key to check)</div>
+  </div>
+</div>
+
+<script src="js/csinterface.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
