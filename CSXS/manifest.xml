@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ExtensionManifest Version="8.0" ExtensionBundleId="com.daftlamb.quiverit"
-  ExtensionBundleVersion="1.0.0" ExtensionBundleName="Quiver It">
+<ExtensionManifest Version="7.0" ExtensionBundleId="com.daftlamb.quiverit" ExtensionBundleVersion="0.1.0" ExtensionBundleName="Quiver It">
   <ExtensionList>
-    <Extension Id="com.daftlamb.quiverit.panel" Version="1.0.0"/>
+    <Extension Id="com.daftlamb.quiverit.panel" Version="0.1.0"/>
   </ExtensionList>
   <ExecutionEnvironment>
     <HostList>
@@ -12,7 +11,7 @@
       <Locale Code="All"/>
     </LocaleList>
     <RequiredRuntimeList>
-      <RequiredRuntime Name="CSXS" Version="11.0"/>
+      <RequiredRuntime Name="CSXS" Version="7.0"/>
     </RequiredRuntimeList>
   </ExecutionEnvironment>
   <DispatchInfoList>
@@ -29,10 +28,10 @@
           <Type>Panel</Type>
           <Menu>Quiver It</Menu>
           <Geometry>
-            <PreferredSize>
-              <Width>320</Width>
-              <Height>520</Height>
-            </PreferredSize>
+            <Size><Width>280</Width><Height>560</Height></Size>
+            <MinSize><Width>240</Width><Height>420</Height></MinSize>
+            <PreferredSize><Width>300</Width><Height>720</Height></PreferredSize>
+            <MaxSize><Width>540</Width><Height>1200</Height></MaxSize>
           </Geometry>
         </UI>
       </DispatchInfo>
